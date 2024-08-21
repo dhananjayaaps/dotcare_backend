@@ -18,6 +18,9 @@ public class User {
     private String password;
     @Getter
     private String email;
+    @Getter
+    @Setter
+    private boolean enabled;
 
     @Getter
     @Setter

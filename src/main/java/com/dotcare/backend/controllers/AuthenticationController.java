@@ -5,10 +5,15 @@ import com.dotcare.backend.dto.LoginRequest;
 import com.dotcare.backend.dto.SignupRequest;
 import com.dotcare.backend.entity.Role;
 import com.dotcare.backend.entity.User;
+import com.dotcare.backend.entity.VerificationToken;
 import com.dotcare.backend.repository.RoleRepository;
 import com.dotcare.backend.repository.UserRepository;
+import com.dotcare.backend.repository.VerificationTokenRepository;
 import com.dotcare.backend.service.CustomUserDetailsService;
+import com.dotcare.backend.service.EmailService;
 import com.dotcare.backend.util.JwtHelper;
+import jakarta.mail.MessagingException;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -16,13 +21,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/auth")
@@ -46,8 +50,14 @@ public class AuthenticationController {
     @Autowired
     private RoleRepository roleRepository;
 
+    @Autowired
+    private VerificationTokenRepository verificationTokenRepository;
+
+    @Autowired
+    private EmailService emailService;
+
     @PostMapping("/signup")
-    public ResponseEntity<String> registerUser(@RequestBody SignupRequest signupRequest) {
+    public ResponseEntity<String> registerUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws MessagingException {
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
             return ResponseEntity.badRequest().body("Error: Username is already taken!");
         }
@@ -65,7 +75,20 @@ public class AuthenticationController {
         user.setRoles(roles);
         userRepository.save(user);
 
-        return ResponseEntity.ok("User registered successfully!");
+        // Generate a verification token
+        String token = UUID.randomUUID().toString();
+        VerificationToken verificationToken = new VerificationToken();
+        verificationToken.setToken(token);
+        verificationToken.setUser(user);
+        verificationToken.setExpiryDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24));  // 24 hours
+        verificationTokenRepository.save(verificationToken);
+
+        // Send verification email
+        String verificationLink = request.getRequestURL().toString() + "/verify?token=" + token;
+        emailService.sendVerificationEmail(user.getEmail(), verificationLink);
+
+        return ResponseEntity.ok("User registered successfully! Please check your email for verification.");
+
     }
 
     @PostMapping("/login")
@@ -83,4 +106,27 @@ public class AuthenticationController {
 
         return ResponseEntity.ok(new JwtResponse(jwt));
     }
+
+    @GetMapping("/verify")
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
+
+        VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
+
+        if (verificationToken == null) {
+            return ResponseEntity.badRequest().body("Invalid verification token");
+        }
+
+        User user = verificationToken.getUser();
+        if (verificationToken.getExpiryDate().before(new Date())) {
+            return ResponseEntity.badRequest().body("Verification token expired");
+        }
+
+        user.setEnabled(true);
+        userRepository.save(user);
+
+        verificationTokenRepository.delete(verificationToken);  // Delete the token after verification
+
+        return ResponseEntity.ok("Email verified successfully! You can now log in.");
+    }
+
 }

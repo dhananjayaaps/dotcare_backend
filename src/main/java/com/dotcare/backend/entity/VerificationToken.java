@@ -4,7 +4,12 @@ import jakarta.persistence.*;
 
 import java.util.Date;
 
+import lombok.Getter;
+import lombok.Setter;
+
 @Entity
+@Getter
+@Setter
 public class VerificationToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
