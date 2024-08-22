@@ -104,7 +104,11 @@ public class AuthenticationController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
         final String jwt = jwtUtil.generateToken(userDetails);
 
-        return ResponseEntity.ok(new JwtResponse(jwt));
+//        return ResponseEntity.ok(new JwtResponse(jwt));
+//        make jwt response with set coockies header
+        return ResponseEntity.ok()
+                .header("Set-Cookie", "jwtToken=" + jwt + "; HttpOnly; Path=/; Max-Age=86400; SameSite=None; Secure")
+                .body(new JwtResponse(jwt));
     }
 
     @GetMapping("/verify")
