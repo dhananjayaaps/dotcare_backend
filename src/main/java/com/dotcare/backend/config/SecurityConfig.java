@@ -43,7 +43,7 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/authenticate", "/auth/**", "/health", "/login").permitAll()
-                        .requestMatchers("/roles/**").permitAll()
+                        .requestMatchers("/roles/**").hasRole("ADMIN")
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))

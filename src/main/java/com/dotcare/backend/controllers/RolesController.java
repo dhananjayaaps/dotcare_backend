@@ -29,42 +29,40 @@ public class RolesController {
     }
 
     @PostMapping("/addRole")
-    public String addDoctor(@RequestBody RoleRequest RoleRequest, HttpServletRequest request) {
+    public String addDoctor(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
 
-        User user = userRepository.findByUsername(RoleRequest.getUsername())
+        User user = userRepository.findByUsername(roleRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
 
-        Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName("ROLE_" + RoleRequest.getRole().toUpperCase())
+        Role userRole = roleRepository.findByName("ROLE_" + roleRequest.getRole().toUpperCase())
                 .orElseThrow(() -> new RuntimeException("Error: Role not found."));
 
-        System.out.println("Role name is" + userRole.getName());
-//        check is that already doctor
         if (user.getRoles().contains(userRole)) {
-            return "User is already a " + RoleRequest.getRole();
+            return "User is already a " + roleRequest.getRole();
         }
-        roles.add(userRole);
 
-        user.setRoles(roles);
-        System.out.println("Role name is" + user.getRoles());
+        user.getRoles().add(userRole);
         userRepository.save(user);
-
-        return "MOH role added successfully!";
+        return roleRequest.getRole() + " role added successfully!";
     }
 
+
     //make for delete role
-
     @PostMapping("/deleteRole")
-    public String deleteRole(@RequestBody RoleRequest RoleRequest, HttpServletRequest request) {
+    public String deleteDoctor(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
 
-        User user = userRepository.findByUsername(RoleRequest.getUsername())
+        User user = userRepository.findByUsername(roleRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
 
-        Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName("ROLE_" + RoleRequest.getRole().toUpperCase())
+        Role userRole = roleRepository.findByName("ROLE_" + roleRequest.getRole().toUpperCase())
                 .orElseThrow(() -> new RuntimeException("Error: Role not found."));
 
-        System.out.println("Role name is" + userRole.getName());
-        return "";
+        if (!user.getRoles().contains(userRole)) {
+            return "User is not a " + roleRequest.getRole();
+        }
+
+        user.getRoles().remove(userRole);
+        userRepository.save(user);
+        return roleRequest.getRole() + " role removed successfully!";
     }
 }
