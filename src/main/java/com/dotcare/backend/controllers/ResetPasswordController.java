@@ -82,8 +82,8 @@ public class ResetPasswordController {
     }
 
     @PostMapping("/reset")
-    public ResponseEntity<String> resetPassword(@RequestParam("token") String token, @RequestBody String newPassword) {
-        VerificationToken resetToken = verificationTokenRepository.findByToken(token);
+    public ResponseEntity<String> resetPassword(@RequestBody ForgetPassword forgetPassword) {
+        VerificationToken resetToken = verificationTokenRepository.findByToken(forgetPassword.getToken());
 
         if (resetToken == null) {
             return ResponseEntity.badRequest().body("Invalid reset token");
@@ -93,12 +93,31 @@ public class ResetPasswordController {
             return ResponseEntity.badRequest().body("Reset token expired");
         }
 
-        // Reset password
+        if (!forgetPassword.getPassword().equals(forgetPassword.getConfirmPassword())) {
+            return ResponseEntity.badRequest().body("Passwords do not match");
+        }
+
+        if (forgetPassword.getPassword().length() < 6) {
+            return ResponseEntity.badRequest().body("Password must be at least 6 characters long");
+        }
+
+        if (forgetPassword.getPassword().length() > 20) {
+            return ResponseEntity.badRequest().body("Password must be at most 20 characters long");
+        }
+
+        if (!forgetPassword.getPassword().matches(".*\\d.*")) {
+            return ResponseEntity.badRequest().body("Password must contain at least one digit");
+        }
         User user = resetToken.getUser();
-        user.setPassword(passwordEncoder.encode(newPassword));
+
+        if (passwordEncoder.encode(forgetPassword.getPassword()).equals((user.getPassword()))) {
+            return ResponseEntity.badRequest().body("New password must be different from the current password");
+        }
+
+        // Reset password
+        user.setPassword(passwordEncoder.encode(forgetPassword.getPassword()));
         userRepository.save(user);
 
-        // Delete the token after successful password reset
         verificationTokenRepository.delete(resetToken);
 
         return ResponseEntity.ok("Password reset successfully.");

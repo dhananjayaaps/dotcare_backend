@@ -1,5 +1,6 @@
 package com.dotcare.backend.service;
 
+import com.dotcare.backend.entity.User;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ public class EmailService {
 
         helper.setTo(email);
         helper.setSubject("Email Verification");
-        helper.setText("<html><body><p>Please verify your email by clicking the link below:</p>"
+        helper.setText("<html><body><p>Reset your password by clicking the link below:</p>"
                 + "<a href=\"" + resetLink + "\">Verify Email</a></body></html>", true);
 
         mailSender.send(message);
