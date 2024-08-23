@@ -24,4 +24,16 @@ public class EmailService {
 
         mailSender.send(message);
     }
+
+    public void sendResetPasswordEmail(String email, String resetLink) throws MessagingException{
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true);
+
+        helper.setTo(email);
+        helper.setSubject("Email Verification");
+        helper.setText("<html><body><p>Please verify your email by clicking the link below:</p>"
+                + "<a href=\"" + resetLink + "\">Verify Email</a></body></html>", true);
+
+        mailSender.send(message);
+    }
 }

@@ -15,6 +15,7 @@ public class User {
     @Getter
     private String username;
     @Getter
+    @Setter
     private String password;
     @Getter
     private String email;

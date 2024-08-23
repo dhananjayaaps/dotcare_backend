@@ -44,6 +44,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/authenticate", "/auth/**", "/health", "/login").permitAll()
                         .requestMatchers("/roles/**").hasRole("ADMIN")
+                        .requestMatchers("/reset-password/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
