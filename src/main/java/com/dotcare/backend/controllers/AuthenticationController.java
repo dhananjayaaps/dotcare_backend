@@ -1,5 +1,6 @@
 package com.dotcare.backend.controllers;
 
+import com.dotcare.backend.dto.ApiResponse;
 import com.dotcare.backend.dto.JwtResponse;
 import com.dotcare.backend.dto.LoginRequest;
 import com.dotcare.backend.dto.SignupRequest;
@@ -57,15 +58,24 @@ public class AuthenticationController {
     private EmailService emailService;
 
     @PostMapping("/signup")
-    public ResponseEntity<String> registerUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws MessagingException {
+    public ResponseEntity<ApiResponse<Object>> registerUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws MessagingException {
         if (userRepository.existsByUsername(signupRequest.getUsername())) {
-            return ResponseEntity.badRequest().body("Error: Username is already taken!");
+            return ResponseEntity
+                    .badRequest()
+                    .body(new ApiResponse<>(false, "Error: Username is already taken!", null));
         }
 
         // Create new user's account
-        User user = new User(signupRequest.getUsername(),
+        User user = new User(
+                signupRequest.getUsername(),
                 passwordEncoder.encode(signupRequest.getPassword()),
-                signupRequest.getEmail());
+                signupRequest.getEmail(),
+                signupRequest.getFirst_name(),
+                signupRequest.getLast_name(),
+                signupRequest.getNic(),
+                signupRequest.getPhoneNumber(),
+                signupRequest.getMarketing_accept()
+        );
 
         Set<Role> roles = new HashSet<>();
         Role userRole = roleRepository.findByName("ROLE_USER")
@@ -83,13 +93,13 @@ public class AuthenticationController {
         verificationToken.setExpiryDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24));  // 24 hours
         verificationTokenRepository.save(verificationToken);
 
-        // Send verification email
+        // Send verification email asynchronously
         String verificationLink = request.getRequestURL().toString() + "/verify?token=" + token;
         emailService.sendVerificationEmail(user.getEmail(), verificationLink);
 
-        return ResponseEntity.ok("User registered successfully! Please check your email for verification.");
-
+        return ResponseEntity.ok(new ApiResponse<>(true, "User registered successfully! Please check your email for verification.", null));
     }
+
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
