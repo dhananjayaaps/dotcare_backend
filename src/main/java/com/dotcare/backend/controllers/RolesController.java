@@ -8,6 +8,7 @@ import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.RoleRepository;
 import com.dotcare.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,8 +25,8 @@ public class RolesController {
     }
 
     @PostMapping("/addRole")
-    public String addDoctor(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
-
+    public ResponseEntity<ApiResponse<Object>> addDoctor(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
+        
         User user = userRepository.findByUsername(roleRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
 
@@ -33,18 +34,18 @@ public class RolesController {
                 .orElseThrow(() -> new RuntimeException("Error: Role not found."));
 
         if (user.getRoles().contains(userRole)) {
-            return "User is already a " + roleRequest.getRole();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ApiResponse<>(false, "User is already a " + roleRequest.getRole(), null));
         }
 
         user.getRoles().add(userRole);
         userRepository.save(user);
-        return roleRequest.getRole() + " role added successfully!";
+        return ResponseEntity.ok(new ApiResponse<>(true, roleRequest.getRole() + " role added successfully!", null));
     }
 
 
     //make for delete role
     @PostMapping("/deleteRole")
-    public String deleteDoctor(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<Object>> deleteDoctor(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
 
         User user = userRepository.findByUsername(roleRequest.getUsername())
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
@@ -53,17 +54,23 @@ public class RolesController {
                 .orElseThrow(() -> new RuntimeException("Error: Role not found."));
 
         if (!user.getRoles().contains(userRole)) {
-            return "User is not a " + roleRequest.getRole();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ApiResponse<>(false, roleRequest.getRole() + " User is not a " + roleRequest.getRole(), null));
         }
 
+        // Remove the role from the user
         user.getRoles().remove(userRole);
         userRepository.save(user);
-        return roleRequest.getRole() + " role removed successfully!";
+
+        // Return success response
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(new ApiResponse<>(true, roleRequest.getRole() + " role removed successfully!", null));
     }
 
+
     @GetMapping("/check")
-    public ResponseEntity<ApiResponse<UserDTO>> getUserDetails(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
-        User user = userRepository.findByUsername(roleRequest.getUsername())
+    public ResponseEntity<ApiResponse<UserDTO>> getUserDetails(@RequestParam String username, HttpServletRequest request) {
+        User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Error: User not found."));
 
         UserDTO userDTO = new UserDTO(user.getFirst_name() + " " + user.getLast_name(), user.getNic(),
@@ -71,4 +78,5 @@ public class RolesController {
 
         return ResponseEntity.ok(new ApiResponse<>(true, "User details are available.", userDTO));
     }
+
 }
