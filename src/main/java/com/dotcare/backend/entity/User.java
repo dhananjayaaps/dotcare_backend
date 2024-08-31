@@ -22,9 +22,9 @@ public class User {
     private String first_name;
     private String last_name;
     private String nic;
-    private String password_confirmation;
     private String phoneNumber;
     private Boolean marketing_accept;
+    private Boolean restricted;
     @ManyToMany(fetch = FetchType.EAGER)
     private Set<Role> roles;
 
@@ -37,6 +37,7 @@ public class User {
         this.nic = nic;
         this.phoneNumber = phoneNumber;
         this.marketing_accept = marketing_accept;
+        this.restricted = false;
     }
 
     public User() {

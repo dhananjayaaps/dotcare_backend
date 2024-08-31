@@ -1,20 +1,15 @@
 package com.dotcare.backend.controllers;
 
+import com.dotcare.backend.dto.ApiResponse;
 import com.dotcare.backend.dto.RoleRequest;
-import com.dotcare.backend.dto.SignupRequest;
+import com.dotcare.backend.dto.UserDTO;
 import com.dotcare.backend.entity.Role;
 import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.RoleRepository;
 import com.dotcare.backend.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.HashSet;
-import java.util.Set;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/roles")
@@ -64,5 +59,16 @@ public class RolesController {
         user.getRoles().remove(userRole);
         userRepository.save(user);
         return roleRequest.getRole() + " role removed successfully!";
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<ApiResponse<UserDTO>> getUserDetails(@RequestBody RoleRequest roleRequest, HttpServletRequest request) {
+        User user = userRepository.findByUsername(roleRequest.getUsername())
+                .orElseThrow(() -> new RuntimeException("Error: User not found."));
+
+        UserDTO userDTO = new UserDTO(user.getFirst_name() + " " + user.getLast_name(), user.getNic(),
+                user.getUsername(), user.getEmail(), user.getRoles().toString());
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "User details are available.", userDTO));
     }
 }
