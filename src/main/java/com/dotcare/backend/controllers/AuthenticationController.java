@@ -16,6 +16,7 @@ import com.dotcare.backend.util.JwtHelper;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -64,42 +65,57 @@ public class AuthenticationController {
                     .badRequest()
                     .body(new ApiResponse<>(false, "Error: Username is already taken!", null));
         }
+        if (userRepository.existsByEmail(signupRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new ApiResponse<>(false, "Error: Email is already taken!", null));
+        }
+        if (userRepository.existsByNic(signupRequest.getUsername())) {
+            return ResponseEntity
+                    .badRequest()
+                    .body(new ApiResponse<>(false, "Error: NIC is already taken!", null));
+        }
 
-        // Create new user's account
-        User user = new User(
-                signupRequest.getUsername(),
-                passwordEncoder.encode(signupRequest.getPassword()),
-                signupRequest.getEmail(),
-                signupRequest.getFirst_name(),
-                signupRequest.getLast_name(),
-                signupRequest.getNic(),
-                signupRequest.getPhoneNumber(),
-                signupRequest.getMarketing_accept()
-        );
+        try {
+            // Create new user's account
+            User user = new User(
+                    signupRequest.getUsername(),
+                    passwordEncoder.encode(signupRequest.getPassword()),
+                    signupRequest.getEmail(),
+                    signupRequest.getFirst_name(),
+                    signupRequest.getLast_name(),
+                    signupRequest.getNic(),
+                    signupRequest.getPhoneNumber(),
+                    signupRequest.getMarketing_accept()
+            );
 
-        Set<Role> roles = new HashSet<>();
-        Role userRole = roleRepository.findByName("ROLE_USER")
-                .orElseThrow(() -> new RuntimeException("Error: Role not found."));
-        roles.add(userRole);
+            Set<Role> roles = new HashSet<>();
+            Role userRole = roleRepository.findByName("ROLE_USER")
+                    .orElseThrow(() -> new RuntimeException("Error: Role not found."));
+            roles.add(userRole);
 
-        user.setRoles(roles);
-        userRepository.save(user);
+            user.setRoles(roles);
+            userRepository.save(user);
 
-        // Generate a verification token
-        String token = UUID.randomUUID().toString();
-        VerificationToken verificationToken = new VerificationToken();
-        verificationToken.setToken(token);
-        verificationToken.setUser(user);
-        verificationToken.setExpiryDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24));  // 24 hours
-        verificationTokenRepository.save(verificationToken);
+            // Generate a verification token
+            String token = UUID.randomUUID().toString();
+            VerificationToken verificationToken = new VerificationToken();
+            verificationToken.setToken(token);
+            verificationToken.setUser(user);
+            verificationToken.setExpiryDate(new Date(System.currentTimeMillis() + 1000 * 60 * 60 * 24));  // 24 hours
+            verificationTokenRepository.save(verificationToken);
 
-        // Send verification email asynchronously
-        String verificationLink = request.getRequestURL().toString() + "/verify?token=" + token;
-        emailService.sendVerificationEmail(user.getEmail(), verificationLink);
+            // Send verification email asynchronously
+            String verificationLink = request.getRequestURL().toString() + "/verify?token=" + token;
+            emailService.sendVerificationEmail(user.getEmail(), verificationLink);
 
-        return ResponseEntity.ok(new ApiResponse<>(true, "User registered successfully! Please check your email for verification.", null));
+            return ResponseEntity.ok(new ApiResponse<>(true, "User registered successfully! Please check your email for verification.", null));
+        } catch (Exception e) {
+            return ResponseEntity
+                    .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(false, e.getMessage(), null));
+        }
     }
-
 
     @PostMapping("/login")
     public ResponseEntity<?> authenticateUser(@RequestBody LoginRequest loginRequest) {
