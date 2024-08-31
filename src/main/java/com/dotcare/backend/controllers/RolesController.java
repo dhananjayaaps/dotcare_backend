@@ -12,6 +12,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+import java.util.Set;
+
 @RestController
 @RequestMapping("/roles")
 public class RolesController {
@@ -77,6 +80,17 @@ public class RolesController {
                 user.getUsername(), user.getEmail(), user.getRoles().toString());
 
         return ResponseEntity.ok(new ApiResponse<>(true, "User details are available.", userDTO));
+    }
+
+    @GetMapping("/byrole")
+    public ResponseEntity<ApiResponse<Object>> getUsersByRole(@RequestParam String role, HttpServletRequest request) {
+        Role userRole = roleRepository.findByName("ROLE_" + role.toUpperCase())
+                .orElseThrow(() -> new RuntimeException("Error: Role not found."));
+
+        List<User> users = userRepository.findByRoles(Set.of(userRole));
+        System.out.println(users);
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "Users with role " + role + " are available.", users));
     }
 
 }
