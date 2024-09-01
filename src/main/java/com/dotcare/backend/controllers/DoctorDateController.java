@@ -1,6 +1,7 @@
 package com.dotcare.backend.controllers;
 
 import com.dotcare.backend.dto.DoctorDateDTO;
+import com.dotcare.backend.dto.DoctorInfoDTO;
 import com.dotcare.backend.entity.DoctorDate;
 import com.dotcare.backend.service.DoctorDateService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,5 +44,11 @@ public class DoctorDateController {
     public ResponseEntity<Void> deleteDoctorDate(@PathVariable Long id) {
         doctorDateService.deleteDoctorDate(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/doctors")
+    public ResponseEntity<List<DoctorInfoDTO>> getDoctors() {
+        List<DoctorInfoDTO> doctors = doctorDateService.getAllDoctors();
+        return ResponseEntity.ok(doctors);
     }
 }

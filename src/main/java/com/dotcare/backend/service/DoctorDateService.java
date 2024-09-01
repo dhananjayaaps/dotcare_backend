@@ -1,6 +1,7 @@
 package com.dotcare.backend.service;
 
 import com.dotcare.backend.dto.DoctorDateDTO;
+import com.dotcare.backend.dto.DoctorInfoDTO;
 import com.dotcare.backend.entity.DoctorDate;
 import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.DoctorDateRepository;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DoctorDateService {
@@ -69,5 +71,17 @@ public class DoctorDateService {
 
     public void deleteDoctorDate(Long id) {
         doctorDateRepository.deleteById(id);
+    }
+
+    public List<DoctorInfoDTO> getAllDoctors() {
+        List<DoctorDate> doctorDates = doctorDateRepository.findAll();
+
+        return doctorDates.stream()
+                .map(doctorDate -> new DoctorInfoDTO(
+                        doctorDate.getDoctorUser().getId(),
+                        doctorDate.getDoctorUser().getUsername(),
+                        doctorDate.getDoctorUser().getFirst_name()+" "+doctorDate.getDoctorUser().getLast_name(),
+                        doctorDate.getDays()))
+                .collect(Collectors.toList());
     }
 }
