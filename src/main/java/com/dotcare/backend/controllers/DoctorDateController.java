@@ -51,4 +51,5 @@ public class DoctorDateController {
         List<DoctorInfoDTO> doctors = doctorDateService.getAllDoctors();
         return ResponseEntity.ok(doctors);
     }
+
 }
