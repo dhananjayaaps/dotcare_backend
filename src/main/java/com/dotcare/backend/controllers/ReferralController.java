@@ -1,5 +1,6 @@
 package com.dotcare.backend.controllers;
 
+import com.dotcare.backend.dto.GetRefferelWithRF;
 import com.dotcare.backend.dto.ReferralDTO;
 import com.dotcare.backend.dto.ReferralResponseDTO;
 import com.dotcare.backend.entity.Mother;
@@ -61,10 +62,21 @@ public class ReferralController {
         return referrals.stream().map(referral -> {
             Mother mother = referral.getMother();
             return new ReferralResponseDTO(
+                    referral.getId(),
                     mother.getName(),
                     mother.getNic(),
                     List.of(referral)
             );
         }).collect(Collectors.toList());
+    }
+
+    @GetMapping("/RiskFactorsbyNic")
+    public List<String> getRiskFactorsByNic(@RequestParam String nic) {
+        return referralService.getRiskFactorsByNic(nic);
+    }
+
+    @GetMapping("/getRFandMomById")
+    public GetRefferelWithRF getRiskFactorsandMotherById(@RequestParam String id) {
+         return referralService.getRiskFactorsMotherById(id);
     }
 }

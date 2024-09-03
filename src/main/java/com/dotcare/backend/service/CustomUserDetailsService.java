@@ -3,7 +3,9 @@ package com.dotcare.backend.service;
 import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,4 +33,9 @@ public class CustomUserDetailsService implements UserDetailsService {
                 user.getRoles().stream().map(role -> new SimpleGrantedAuthority(role.getName())).collect(Collectors.toList()));
     }
 
+    public UserDetails getCurrentUser() {
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String doctorId = auth.getName();
+        return loadUserByUsername(doctorId);
+    }
 }

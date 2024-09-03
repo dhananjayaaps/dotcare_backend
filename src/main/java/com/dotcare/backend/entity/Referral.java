@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Setter
@@ -40,7 +41,10 @@ public class Referral {
     private String birthWeight;
     private String postnatalDay;
     private String doctorId;
-    private String channelDate;
+    private LocalDate channelDate;
+    private String RefferedBy;
+    private Boolean status;
+    private LocalDate date;
 
     public Referral() {
     }
@@ -48,7 +52,7 @@ public class Referral {
     public Referral(Mother mother, String antenatalOrPostnatal, String deliveryDate, String expectedDateOfDelivery,
                     Integer pog, Boolean parityGravidity, Boolean parityParity, Boolean parityChildren,
                     List<String> riskFactors, String reasonForRequest, String modesOfDelivery, String birthWeight,
-                    String postnatalDay, String doctorId, String channelDate) {
+                    String postnatalDay, String doctorId, String channelDate, String RefferedBy) {
         this.mother = mother;
         this.antenatalOrPostnatal = antenatalOrPostnatal;
         this.deliveryDate = deliveryDate;
@@ -63,6 +67,9 @@ public class Referral {
         this.birthWeight = birthWeight;
         this.postnatalDay = postnatalDay;
         this.doctorId = doctorId;
-        this.channelDate = channelDate;
+        this.channelDate = channelDate != null ? LocalDate.parse(channelDate) : null;
+        this.RefferedBy = RefferedBy;
+        this.status = true;
+        this.date = LocalDate.now();
     }
 }

@@ -4,6 +4,10 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @Getter
@@ -36,6 +40,7 @@ public class ReferralDTO {
                        Boolean parityParity, Boolean parityChildren, List<String> riskFactors,
                        String reason_for_request, String modes_of_delivery, String birth_weight,
                        String postnatal_day, String doctorId, String channelDate) {
+
         this.nic = nic;
         this.name = name;
         this.antenatalOrPostnatal = antenatalOrPostnatal;

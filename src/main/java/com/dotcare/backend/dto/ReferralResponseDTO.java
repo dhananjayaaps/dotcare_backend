@@ -11,6 +11,7 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class ReferralResponseDTO {
+    private Long id;
     private String motherName;
     private String motherNic;
     private List<Referral> referrals;

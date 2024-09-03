@@ -1,16 +1,18 @@
 package com.dotcare.backend.service;
 
+import com.dotcare.backend.dto.GetRefferelWithRF;
 import com.dotcare.backend.dto.ReferralDTO;
+import com.dotcare.backend.dto.RiskFactorDetail;
 import com.dotcare.backend.entity.Mother;
 import com.dotcare.backend.entity.Referral;
-import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.MotherRepository;
 import com.dotcare.backend.repository.ReferralRepository;
 import com.dotcare.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +56,8 @@ public class ReferralService {
                 referralDTO.getBirth_weight(),
                 referralDTO.getPostnatal_day(),
                 referralDTO.getDoctorId(),
-                referralDTO.getChannelDate()
+                referralDTO.getChannelDate(),
+                userDetailsService.getCurrentUser().getUsername()
         );
 
 
@@ -92,7 +95,7 @@ public class ReferralService {
         referral.setBirthWeight(referralDTO.getBirth_weight());
         referral.setPostnatalDay(referralDTO.getPostnatal_day());
         referral.setDoctorId(referralDTO.getDoctorId());
-        referral.setChannelDate(referralDTO.getChannelDate());
+        referral.setChannelDate(LocalDate.parse(referralDTO.getChannelDate()));
 
         return referralRepository.save(referral);
     }
@@ -107,5 +110,69 @@ public class ReferralService {
 
     public List<Referral> getReferralsByDoctorId(String doctorId) {
         return referralRepository.findAllByDoctorId(doctorId);
+    }
+
+    public List<String> getRiskFactorsByNic(String nic) {
+        Mother mother = motherRepository.findByNic(nic);
+        List<Referral> referrals = referralRepository.findAllByMother(mother);
+        List<String> riskFactors = referrals.stream()
+                .map(Referral::getRiskFactors)
+                .flatMap(List::stream)
+                .toList();
+        return riskFactors;
+    }
+
+    //get referral by id and add all the risk factors to the list
+    public List<String> getRiskFactorsByReferralId(Long id) {
+        Referral referral = referralRepository.findById(id).orElseThrow(() -> new RuntimeException("Referral not found"));
+        List<String> riskFactors = referral.getRiskFactors();
+        return riskFactors;
+    }
+
+    public GetRefferelWithRF getRiskFactorsMotherById(String referralId) {
+
+        Optional<Referral> referralOptional = referralRepository.findById(Long.valueOf(referralId));
+
+        if (referralOptional.isEmpty()) {
+            // Handle the case where the referral is not found
+            throw new RuntimeException("Referral not found");
+        }
+
+        Referral referral = referralOptional.get();
+
+        // Get mother from referral
+        Mother mother = referral.getMother();
+
+        // Get all referrals of the mother
+        List<Referral> referrals = referralRepository.findAllByMother(mother);
+
+        // Create a list to hold risk factor details with date and doctor name
+        List<RiskFactorDetail> riskFactorDetails = new ArrayList<>();
+
+        for (Referral ref : referrals) {
+            // Get doctor's name by referral doctor username
+//            String doctorName = userRepository.findByUsername(ref.getDoctorId()).get().getFirst_name();
+//            get doctor full name
+            String doctorName = userRepository.findByUsername(ref.getDoctorId()).get().getFirst_name() + " " + userRepository.findByUsername(ref.getDoctorId()).get().getLast_name();
+            for (String riskFactor : ref.getRiskFactors()) {
+                // Create a new RiskFactorDetail object and add it to the list
+                riskFactorDetails.add(new RiskFactorDetail(riskFactor, ref.getChannelDate(), doctorName));
+            }
+        }
+
+        // Construct the DTO for the response
+        GetRefferelWithRF dto = new GetRefferelWithRF(
+                new ReferralDTO(
+                        mother.getNic(), mother.getName(), referral.getAntenatalOrPostnatal(),
+                        referral.getDeliveryDate(), referral.getExpectedDateOfDelivery(), referral.getPog(),
+                        referral.getParityGravidity(), referral.getParityParity(), referral.getParityChildren(),
+                        referral.getRiskFactors(), referral.getReasonForRequest(), referral.getModesOfDelivery(),
+                        referral.getBirthWeight(), referral.getPostnatalDay(), referral.getDoctorId(),
+                        referral.getChannelDate().toString()
+                ),
+                riskFactorDetails
+        );
+
+        return dto;
     }
 }
