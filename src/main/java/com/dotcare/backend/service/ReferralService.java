@@ -158,7 +158,7 @@ public class ReferralService {
             String doctorName = doctor.get().getFirst_name();
             for (String riskFactor : ref.getRiskFactors()) {
                 // Create a new RiskFactorDetail object and add it to the list
-                riskFactorDetails.add(new RiskFactorDetail(riskFactor, ref.getChannelDate(), doctorName));
+                riskFactorDetails.add(new RiskFactorDetail(riskFactor, ref.getDate(), doctorName));
             }
         }
 
