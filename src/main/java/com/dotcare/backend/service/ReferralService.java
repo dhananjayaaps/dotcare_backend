@@ -5,6 +5,7 @@ import com.dotcare.backend.dto.ReferralDTO;
 import com.dotcare.backend.dto.RiskFactorDetail;
 import com.dotcare.backend.entity.Mother;
 import com.dotcare.backend.entity.Referral;
+import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.MotherRepository;
 import com.dotcare.backend.repository.ReferralRepository;
 import com.dotcare.backend.repository.UserRepository;
@@ -153,7 +154,8 @@ public class ReferralService {
             // Get doctor's name by referral doctor username
 //            String doctorName = userRepository.findByUsername(ref.getDoctorId()).get().getFirst_name();
 //            get doctor full name
-            String doctorName = userRepository.findByUsername(ref.getDoctorId()).get().getFirst_name() + " " + userRepository.findByUsername(ref.getDoctorId()).get().getLast_name();
+            Optional<User> doctor = userRepository.findByUsername(ref.getRefferedBy());
+            String doctorName = doctor.get().getFirst_name();
             for (String riskFactor : ref.getRiskFactors()) {
                 // Create a new RiskFactorDetail object and add it to the list
                 riskFactorDetails.add(new RiskFactorDetail(riskFactor, ref.getChannelDate(), doctorName));

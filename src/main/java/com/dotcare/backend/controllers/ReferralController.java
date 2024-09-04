@@ -79,4 +79,10 @@ public class ReferralController {
     public GetRefferelWithRF getRiskFactorsandMotherById(@RequestParam String id) {
          return referralService.getRiskFactorsMotherById(id);
     }
+
+    @PostMapping("/addRiskFactor")
+    public ResponseEntity<Referral> addFactorForMother(@RequestBody ReferralDTO referralDTO) {
+        Referral referral = referralService.createReferral(referralDTO);
+        return ResponseEntity.ok(referral);
+    }
 }

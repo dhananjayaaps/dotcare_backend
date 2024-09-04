@@ -21,7 +21,6 @@ public class Referral {
     @JsonBackReference // Breaks the recursion
     private Mother mother;
 
-    @Column(nullable = false)
     private String antenatalOrPostnatal;
 
     private String deliveryDate;
@@ -34,7 +33,6 @@ public class Referral {
     @ElementCollection
     private List<String> riskFactors;
 
-    @Column(nullable = false)
     private String reasonForRequest;
 
     private String modesOfDelivery;
