@@ -1,9 +1,6 @@
 package com.dotcare.backend.controllers;
 
-import com.dotcare.backend.dto.ApiResponse;
-import com.dotcare.backend.dto.JwtResponse;
-import com.dotcare.backend.dto.LoginRequest;
-import com.dotcare.backend.dto.SignupRequest;
+import com.dotcare.backend.dto.*;
 import com.dotcare.backend.entity.Role;
 import com.dotcare.backend.entity.User;
 import com.dotcare.backend.entity.VerificationToken;
@@ -157,6 +154,30 @@ public class AuthenticationController {
         verificationTokenRepository.delete(verificationToken);  // Delete the token after verification
 
         return ResponseEntity.ok("Email verified successfully! You can now log in.");
+    }
+
+    @GetMapping("/logout")
+    public ResponseEntity<String> logout() {
+        return ResponseEntity.ok()
+                .header("Set-Cookie", "jwtToken=; HttpOnly; Path=/; Max-Age=0; SameSite=None; Secure")
+                .body("Logged out successfully");
+    }
+
+    @GetMapping("/check")
+    public ResponseEntity<String> check() {
+        return ResponseEntity.ok("Checked");
+    }
+
+    @GetMapping("/getUser")
+    public ResponseEntity<UserDetailsResponse> getUser() {
+        UserDetails userDetails = userDetailsService.getCurrentUser();
+        User user = userRepository.findByUsername(userDetails.getUsername()).get();
+        UserDetailsResponse userDetailsResponse = new UserDetailsResponse(
+                user.getUsername(),
+                user.getFirst_name() + " " + user.getLast_name(),
+                user.getEmail(), true
+        );
+        return ResponseEntity.ok(userDetailsResponse);
     }
 
 }
