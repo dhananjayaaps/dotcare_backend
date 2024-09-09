@@ -22,10 +22,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/auth")
@@ -127,12 +125,19 @@ public class AuthenticationController {
         final UserDetails userDetails = userDetailsService.loadUserByUsername(loginRequest.getUsername());
         final String jwt = jwtUtil.generateToken(userDetails);
 
-//        return ResponseEntity.ok(new JwtResponse(jwt));
-//        make jwt response with set coockies header
+        // Get the user and their roles
+        User user = userRepository.findByUsername(userDetails.getUsername()).get();
+        List<String> roles = user.getRoles().stream()
+                .map(Role::getName) // Assuming Role class has a getName() method
+                .collect(Collectors.toList());
+
+        LoginResponse response = new LoginResponse(jwt, roles);
+
         return ResponseEntity.ok()
                 .header("Set-Cookie", "jwtToken=" + jwt + "; HttpOnly; Path=/; Max-Age=86400; SameSite=None; Secure")
-                .body(new JwtResponse(jwt));
+                .body(response);
     }
+
 
     @GetMapping("/verify")
     public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
