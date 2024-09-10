@@ -43,7 +43,6 @@ public class SecurityConfig {
                 .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/authenticate", "/auth/**", "/health", "/login").permitAll()
-                        .requestMatchers("/roles/**").hasRole("ADMIN")
                         .requestMatchers("/reset-password/**").permitAll()
                         .anyRequest().authenticated()
                 )
