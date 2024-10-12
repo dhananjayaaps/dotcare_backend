@@ -70,6 +70,38 @@ public class ReferralController {
         }).collect(Collectors.toList());
     }
 
+    @GetMapping("/myMothers")
+    public List<ReferralResponseDTO> getMothersByDoctorId() {
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        String doctorId = auth.getName();
+
+        List<Referral> referrals = referralService.getReferralsByDoctorId(doctorId);
+
+        // Collect unique mothers by their NIC and sort by name
+        List<ReferralResponseDTO> uniqueMothers = referrals.stream()
+                .collect(Collectors.toMap(
+                        referral -> referral.getMother().getNic(), // Use NIC as the key to ensure uniqueness
+                        referral -> referral, // Map referral to itself
+                        (existing, replacement) -> existing // Keep the first referral if duplicates are found
+                ))
+                .values().stream()
+                .sorted((r1, r2) -> r1.getMother().getName().compareToIgnoreCase(r2.getMother().getName())) // Sort by mother's name
+                .map(referral -> {
+                    Mother mother = referral.getMother();
+                    return new ReferralResponseDTO(
+                            referral.getId(),
+                            mother.getName(),
+                            mother.getNic(),
+                            List.of(referral) // Keep referral details as required
+                    );
+                })
+                .collect(Collectors.toList());
+
+        return uniqueMothers;
+    }
+
+
     @GetMapping("/RiskFactorsbyNic")
     public List<String> getRiskFactorsByNic(@RequestParam String nic) {
         return referralService.getRiskFactorsByNic(nic);

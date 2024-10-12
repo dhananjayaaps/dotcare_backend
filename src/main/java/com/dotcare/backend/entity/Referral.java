@@ -70,4 +70,6 @@ public class Referral {
         this.status = true;
         this.date = LocalDate.now();
     }
+
+
 }
