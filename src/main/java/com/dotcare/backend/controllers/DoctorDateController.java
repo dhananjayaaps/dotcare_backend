@@ -34,6 +34,12 @@ public class DoctorDateController {
         return ResponseEntity.ok(doctorDate);
     }
 
+    @GetMapping("/byUsername")
+    public ResponseEntity<List<Integer>> getDoctorDaysByUsername(@RequestParam String id) {
+        List<Integer> doctorDays = doctorDateService.getDoctorDaysByUsername(id);
+        return ResponseEntity.ok(doctorDays);
+    }
+
     @PutMapping("/{id}")
     public ResponseEntity<DoctorDate> updateDoctorDate(@PathVariable Long id, @RequestBody DoctorDateDTO doctorDateDTO) {
         DoctorDate updatedDoctorDate = doctorDateService.updateDoctorDate(id, doctorDateDTO);

@@ -84,4 +84,15 @@ public class DoctorDateService {
                         doctorDate.getDays()))
                 .collect(Collectors.toList());
     }
+
+    public List<Integer> getDoctorDaysByUsername(String username) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        DoctorDate doctorDate = doctorDateRepository.findByDoctorUser(user)
+                .orElseThrow(() -> new RuntimeException("DoctorDate not found"));
+
+        return doctorDate.getDays();
+    }
+
 }

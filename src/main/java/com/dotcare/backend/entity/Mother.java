@@ -21,6 +21,8 @@ public class Mother {
     @Column(nullable = false)
     private String name;
 
+    private String status;
+
     @OneToMany(mappedBy = "mother", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference // Breaks the recursion
     private List<Referral> referrals;

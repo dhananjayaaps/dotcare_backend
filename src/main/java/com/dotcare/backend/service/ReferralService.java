@@ -138,22 +138,11 @@ public class ReferralService {
             // Handle the case where the referral is not found
             throw new RuntimeException("Referral not found");
         }
-
         Referral referral = referralOptional.get();
-
-        // Get mother from referral
         Mother mother = referral.getMother();
-
-        // Get all referrals of the mother
         List<Referral> referrals = referralRepository.findAllByMother(mother);
-
-        // Create a list to hold risk factor details with date and doctor name
         List<RiskFactorDetail> riskFactorDetails = new ArrayList<>();
-
         for (Referral ref : referrals) {
-            // Get doctor's name by referral doctor username
-//            String doctorName = userRepository.findByUsername(ref.getDoctorId()).get().getFirst_name();
-//            get doctor full name
             Optional<User> doctor = userRepository.findByUsername(ref.getRefferedBy());
             String doctorName = doctor.get().getFirst_name();
             for (String riskFactor : ref.getRiskFactors()) {
@@ -162,7 +151,6 @@ public class ReferralService {
             }
         }
 
-        // Construct the DTO for the response
         GetRefferelWithRF dto = new GetRefferelWithRF(
                 new ReferralDTO(
                         mother.getNic(), mother.getName(), referral.getAntenatalOrPostnatal(),
@@ -174,7 +162,7 @@ public class ReferralService {
                 ),
                 riskFactorDetails
         );
-
         return dto;
     }
+
 }
