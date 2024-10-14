@@ -1,18 +1,13 @@
 package com.dotcare.backend.controllers;
 
-import com.dotcare.backend.dto.ReferralResponseDTO;
+import com.dotcare.backend.dto.GetRefferelWithRF;
+import com.dotcare.backend.dto.ViewMotherDTO;
 import com.dotcare.backend.entity.Clinic;
 import com.dotcare.backend.entity.Mother;
-import com.dotcare.backend.entity.Referral;
-import com.dotcare.backend.entity.User;
-import com.dotcare.backend.service.CustomUserDetailsService;
 import com.dotcare.backend.service.MotherService;
 import com.dotcare.backend.service.ReferralService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Comparator;
@@ -37,13 +32,13 @@ public class MotherController {
     }
 
     @GetMapping("/moh")
-    public List<ReferralResponseDTO> getMothersByDoctorId() {
+    public List<ViewMotherDTO> getMothersByDoctorId() {
 
         Clinic clinic = referralService.getMohArea();
 
         List<Mother> mothers = motherService.getMothersByMohArea(clinic);
 
-        List<ReferralResponseDTO> uniqueMothers = mothers.stream()
+        List<ViewMotherDTO> uniqueMothers = mothers.stream()
                 .collect(Collectors.toMap(
                         Mother::getNic,
                         mother -> mother,
@@ -52,16 +47,21 @@ public class MotherController {
                 .values().stream()
                 .sorted(Comparator.comparing(Mother::getName, String::compareToIgnoreCase))
                 .map(mother -> {
-                    return new ReferralResponseDTO(
-                            mother.getId(), // Assuming there's an ID field in Mother
+                    return new ViewMotherDTO(
+                            mother.getId(),
                             mother.getName(),
                             mother.getNic(),
-                            mother.getReferrals() // Assuming Mother contains a list of referrals
+                            mother.getReferrals()
                     );
                 })
                 .collect(Collectors.toList());
 
         return uniqueMothers;
+    }
+
+    @GetMapping("/getRFandMomById")
+    public GetRefferelWithRF getRiskFactorsandMotherById(@RequestParam String id) {
+        return motherService.getRiskFactorsMotherById(id);
     }
 
 }

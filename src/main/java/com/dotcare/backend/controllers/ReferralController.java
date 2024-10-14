@@ -2,7 +2,7 @@ package com.dotcare.backend.controllers;
 
 import com.dotcare.backend.dto.GetRefferelWithRF;
 import com.dotcare.backend.dto.ReferralDTO;
-import com.dotcare.backend.dto.ReferralResponseDTO;
+import com.dotcare.backend.dto.ViewMotherDTO;
 import com.dotcare.backend.entity.Mother;
 import com.dotcare.backend.entity.Referral;
 import com.dotcare.backend.service.ReferralService;
@@ -60,7 +60,7 @@ public class ReferralController {
     }
 
     @GetMapping("/myAppointments")
-    public List<ReferralResponseDTO> getReferralsByDoctorId() {
+    public List<ViewMotherDTO> getReferralsByDoctorId() {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String doctorId = auth.getName();
@@ -69,7 +69,7 @@ public class ReferralController {
 
         return referrals.stream().map(referral -> {
             Mother mother = referral.getMother();
-            return new ReferralResponseDTO(
+            return new ViewMotherDTO(
                     referral.getId(),
                     mother.getName(),
                     mother.getNic(),
@@ -79,7 +79,7 @@ public class ReferralController {
     }
 
     @GetMapping("/myMothers")
-    public List<ReferralResponseDTO> getMothersByDoctorId() {
+    public List<ViewMotherDTO> getMothersByDoctorId() {
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String doctorId = auth.getName();
@@ -87,7 +87,7 @@ public class ReferralController {
         List<Referral> referrals = referralService.getReferralsByDoctorId(doctorId);
 
         // Collect unique mothers by their NIC and sort by name
-        List<ReferralResponseDTO> uniqueMothers = referrals.stream()
+        List<ViewMotherDTO> uniqueMothers = referrals.stream()
                 .collect(Collectors.toMap(
                         referral -> referral.getMother().getNic(), // Use NIC as the key to ensure uniqueness
                         referral -> referral, // Map referral to itself
@@ -97,7 +97,7 @@ public class ReferralController {
                 .sorted((r1, r2) -> r1.getMother().getName().compareToIgnoreCase(r2.getMother().getName())) // Sort by mother's name
                 .map(referral -> {
                     Mother mother = referral.getMother();
-                    return new ReferralResponseDTO(
+                    return new ViewMotherDTO(
                             referral.getId(),
                             mother.getName(),
                             mother.getNic(),
