@@ -14,7 +14,7 @@ public class Clinic {
 
     private String name;
 
-    @ManyToOne
+    @OneToOne
     private User moh;
 
     public Clinic() {

@@ -21,13 +21,19 @@ public class Mother {
     @Column(nullable = false)
     private String name;
 
-    private String status;
+    private Long mohId;
 
     @OneToMany(mappedBy = "mother", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference // Breaks the recursion
     private List<Referral> referrals;
 
     public Mother() {
+    }
+
+    public Mother(String nic, String name, String mohId) {
+        this.nic = nic;
+        this.name = name;
+        this.mohId = Long.parseLong(mohId);
     }
 
     public Mother(String nic, String name) {

@@ -30,6 +30,8 @@ public class ReferralDTO {
     private String postnatal_day;
     private String doctorId;
     private String channelDate;
+    private String mohArea;
+
 
     // Default constructor
     public ReferralDTO() {}

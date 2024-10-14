@@ -22,8 +22,16 @@ public class ReferralController {
     @Autowired
     private ReferralService referralService;
 
-    @PostMapping
-    public ResponseEntity<Referral> createReferral(@RequestBody ReferralDTO referralDTO) {
+    @PostMapping("/byMoh")
+    public ResponseEntity<Referral> createReferralByMoh(@RequestBody ReferralDTO referralDTO) {
+        referralDTO.setMohArea(String.valueOf(referralService.getMohArea().getId()));
+        Referral referral = referralService.createReferral(referralDTO);
+        return ResponseEntity.ok(referral);
+    }
+
+    @PostMapping("/byDoctor")
+    public ResponseEntity<Referral> createReferralByDoctor(@RequestBody ReferralDTO referralDTO) {
+        referralDTO.setMohArea(String.valueOf(referralService.getMohAreaByMohUsername(referralDTO.getDoctorId()).getId()));
         Referral referral = referralService.createReferral(referralDTO);
         return ResponseEntity.ok(referral);
     }

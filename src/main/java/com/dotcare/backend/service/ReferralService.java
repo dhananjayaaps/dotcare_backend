@@ -3,13 +3,16 @@ package com.dotcare.backend.service;
 import com.dotcare.backend.dto.GetRefferelWithRF;
 import com.dotcare.backend.dto.ReferralDTO;
 import com.dotcare.backend.dto.RiskFactorDetail;
+import com.dotcare.backend.entity.Clinic;
 import com.dotcare.backend.entity.Mother;
 import com.dotcare.backend.entity.Referral;
 import com.dotcare.backend.entity.User;
+import com.dotcare.backend.repository.ClinicRepository;
 import com.dotcare.backend.repository.MotherRepository;
 import com.dotcare.backend.repository.ReferralRepository;
 import com.dotcare.backend.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -29,6 +32,9 @@ public class ReferralService {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private ClinicRepository clinicRepository;
+
     final CustomUserDetailsService userDetailsService;
 
     public ReferralService(CustomUserDetailsService userDetailsService) {
@@ -38,7 +44,7 @@ public class ReferralService {
     public Referral createReferral(ReferralDTO referralDTO) {
         Mother mother = motherRepository.findByNic(referralDTO.getNic());
         if (mother == null) {
-            mother = new Mother(referralDTO.getNic(), referralDTO.getName());
+            mother = new Mother(referralDTO.getNic(), referralDTO.getName(), referralDTO.getMohArea());
             mother = motherRepository.save(mother);
         }
 
@@ -165,4 +171,14 @@ public class ReferralService {
         return dto;
     }
 
+    public Clinic getMohArea() {
+        UserDetails user = userDetailsService.getCurrentUser();
+        User currentUser = userRepository.findByUsername(user.getUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        return clinicRepository.findByMoh_Id(currentUser.getId());
+    }
+
+    public Clinic getMohAreaByMohUsername(String doctorId) {
+        User currentUser = userRepository.findByUsername(doctorId).orElseThrow(() -> new RuntimeException("User not found"));
+        return clinicRepository.findByMoh_Id(currentUser.getId());
+    }
 }
