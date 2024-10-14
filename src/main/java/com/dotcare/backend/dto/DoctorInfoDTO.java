@@ -19,4 +19,11 @@ public class DoctorInfoDTO {
         this.doctorName = doctorName;
         this.availableDays = availableDays;
     }
+
+    public DoctorInfoDTO(Long doctorId, String doctorUsername, String doctorName) {
+        this.doctorId = doctorId;
+        this.doctorUsername = doctorUsername;
+        this.doctorName = doctorName;
+        this.availableDays = List.of(1, 2, 3, 4, 5);
+    }
 }

@@ -2,6 +2,7 @@ package com.dotcare.backend.controllers;
 
 import com.dotcare.backend.dto.ApiResponse;
 import com.dotcare.backend.dto.ClinicDTO;
+import com.dotcare.backend.dto.DoctorInfoDTO;
 import com.dotcare.backend.entity.Clinic;
 import com.dotcare.backend.entity.User;
 import com.dotcare.backend.service.ClinicService;
@@ -11,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/clinics")
@@ -53,6 +56,12 @@ public class ClinicController {
         clinic.setId(id);
         Clinic updatedClinic = clinicService.updateClinic(clinic);
         return ResponseEntity.ok(new ApiResponse<>(true, "Clinic updated successfully!", updatedClinic));
+    }
+
+    @GetMapping("/listMoh")
+    public ResponseEntity<List<DoctorInfoDTO>> getDoctors() {
+        List<DoctorInfoDTO> mohList = clinicService.getAllMOH();
+        return ResponseEntity.ok(mohList);
     }
 }
 

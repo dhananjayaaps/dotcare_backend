@@ -1,7 +1,9 @@
 package com.dotcare.backend.service;
 
 import com.dotcare.backend.dto.ClinicDTO;
+import com.dotcare.backend.dto.DoctorInfoDTO;
 import com.dotcare.backend.entity.Clinic;
+import com.dotcare.backend.entity.DoctorDate;
 import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.ClinicRepository;
 import com.dotcare.backend.repository.UserRepository;
@@ -9,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ClinicService {
@@ -122,6 +125,18 @@ public class ClinicService {
             // Throw an exception if clinic is not found
             throw new NoSuchElementException("Clinic not found with id: " + clinicDTO.getId());
         }
+    }
+
+    public List<DoctorInfoDTO> getAllMOH() {
+
+        List<Clinic> allMohAreas = clinicRepository.findAll();
+
+        return allMohAreas.stream()
+                .map(mohArea -> new DoctorInfoDTO(
+                        mohArea.getMoh().getId(),
+                        mohArea.getMoh().getUsername(),
+                        mohArea.getMoh().getFirst_name()+" "+mohArea.getMoh().getLast_name()))
+                .collect(Collectors.toList());
     }
 
 }
