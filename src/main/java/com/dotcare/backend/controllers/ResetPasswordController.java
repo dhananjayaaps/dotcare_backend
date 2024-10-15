@@ -12,6 +12,7 @@ import com.dotcare.backend.util.JwtHelper;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -36,6 +37,9 @@ public class ResetPasswordController {
 
     @Autowired
     private EmailService emailService;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @GetMapping("/verify")
     public ResponseEntity<String> validateResetToken(@RequestParam("token") String token) {
@@ -75,7 +79,7 @@ public class ResetPasswordController {
         verificationTokenRepository.save(resetToken);
 
         // Send reset password email
-        String resetLink = request.getRequestURL().toString().replace("/request", "/verify") + "?token=" + token;
+        String resetLink = frontendUrl + "/auth/new-password?token=" + token;
         emailService.sendResetPasswordEmail(user.getEmail(), resetLink);
 
         return ResponseEntity.ok("Password reset link sent to your email.");

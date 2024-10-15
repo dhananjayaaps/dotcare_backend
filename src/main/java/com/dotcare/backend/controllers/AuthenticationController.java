@@ -13,6 +13,7 @@ import com.dotcare.backend.util.JwtHelper;
 import jakarta.mail.MessagingException;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -52,6 +53,9 @@ public class AuthenticationController {
 
     @Autowired
     private EmailService emailService;
+
+    @Value("${frontend.url}")
+    private String frontendUrl;
 
     @PostMapping("/signup")
     public ResponseEntity<ApiResponse<Object>> registerUser(@RequestBody SignupRequest signupRequest, HttpServletRequest request) throws MessagingException {
@@ -101,7 +105,7 @@ public class AuthenticationController {
             verificationTokenRepository.save(verificationToken);
 
             // Send verification email asynchronously
-            String verificationLink = request.getRequestURL().toString() + "/verify?token=" + token;
+            String verificationLink = frontendUrl + "/auth/email-verify?token=" + token;
             emailService.sendVerificationEmail(user.getEmail(), verificationLink);
 
             return ResponseEntity.ok(new ApiResponse<>(true, "User registered successfully! Please check your email for verification.", null));
@@ -140,7 +144,7 @@ public class AuthenticationController {
 
 
     @GetMapping("/verify")
-    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) {
+    public ResponseEntity<String> verifyEmail(@RequestParam("token") String token) throws InterruptedException {
 
         VerificationToken verificationToken = verificationTokenRepository.findByToken(token);
 
@@ -156,7 +160,9 @@ public class AuthenticationController {
         user.setEnabled(true);
         userRepository.save(user);
 
-        verificationTokenRepository.delete(verificationToken);  // Delete the token after verification
+        userDetailsService.deleteToken(verificationToken);
+
+//        verificationTokenRepository.delete(verificationToken);  // Delete the token after verification
 
         return ResponseEntity.ok("Email verified successfully! You can now log in.");
     }
