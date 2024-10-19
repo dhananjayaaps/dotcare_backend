@@ -35,6 +35,12 @@ public class MotherController {
         return mother.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
+    @GetMapping("/details/{nic}")
+    public ResponseEntity<Mother> getMotherDetailsView(@PathVariable String nic) {
+        Optional<Mother> mother = motherService.getMotherLatestByNic(nic);
+        return mother.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+    }
+
     @GetMapping("/moh")
     public List<ViewMotherDTO> getMothersForMoh() {
 

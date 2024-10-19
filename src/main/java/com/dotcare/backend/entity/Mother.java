@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.sql.Date;
 import java.util.List;
 
 @Setter
@@ -22,6 +23,7 @@ public class Mother {
     private String name;
 
     private Long mohId;
+    private String dob;
 
     @OneToMany(mappedBy = "mother", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JsonManagedReference // Breaks the recursion
@@ -30,10 +32,11 @@ public class Mother {
     public Mother() {
     }
 
-    public Mother(String nic, String name, String mohId) {
+    public Mother(String nic, String name, String mohId, String DOB) {
         this.nic = nic;
         this.name = name;
         this.mohId = Long.parseLong(mohId);
+        this.dob = DOB;
     }
 
     public Mother(String nic, String name) {

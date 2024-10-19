@@ -44,7 +44,7 @@ public class ReferralService {
     public Referral createReferral(ReferralDTO referralDTO) {
         Mother mother = motherRepository.findByNic(referralDTO.getNic());
         if (mother == null) {
-            mother = new Mother(referralDTO.getNic(), referralDTO.getName(), referralDTO.getMohArea());
+            mother = new Mother(referralDTO.getNic(), referralDTO.getName(), referralDTO.getMohArea(), referralDTO.getDob());
             mother = motherRepository.save(mother);
         }
 

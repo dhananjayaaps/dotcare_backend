@@ -93,4 +93,13 @@ public class RolesController {
         return ResponseEntity.ok(new ApiResponse<>(true, "Users with role " + role + " are available.", users));
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<Object>> getAllUsers(HttpServletRequest request) {
+
+        List<User> users = userRepository.findAll();
+        System.out.println(users);
+
+        return ResponseEntity.ok(new ApiResponse<>(true, "All users are available.", users));
+    }
+
 }

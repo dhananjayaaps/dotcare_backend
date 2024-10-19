@@ -10,7 +10,6 @@ import com.dotcare.backend.entity.User;
 import com.dotcare.backend.repository.MotherRepository;
 import com.dotcare.backend.repository.ReferralRepository;
 import com.dotcare.backend.repository.UserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -51,15 +50,6 @@ public class MotherService {
 //        List<Referral> referral = mother.getReferrals();
         List<Referral> referrals = referralRepository.findAllByMother(mother);
 
-        for (int i = referrals.size() - 1; i >= 0; i--) {
-            if (referrals.get(i).getAntenatalOrPostnatal() == null) {
-                referrals.remove(i);
-            }else {
-                break;
-            }
-        }
-        Referral referral = referrals.get(referrals.size() - 1);
-
         List<RiskFactorDetail> riskFactorDetails = new ArrayList<>();
         for (Referral ref : referrals) {
             Optional<User> doctor = userRepository.findByUsername(ref.getRefferedBy());
@@ -69,6 +59,15 @@ public class MotherService {
                 riskFactorDetails.add(new RiskFactorDetail(riskFactor, ref.getDate(), doctorName));
             }
         }
+
+        for (int i = referrals.size() - 1; i >= 0; i--) {
+            if (referrals.get(i).getAntenatalOrPostnatal() == null) {
+                referrals.remove(i);
+            }else {
+                break;
+            }
+        }
+        Referral referral = referrals.get(referrals.size() - 1);
 
         GetRefferelWithRF dto = new GetRefferelWithRF(
                 new ReferralDTO(
@@ -83,4 +82,26 @@ public class MotherService {
         );
         return dto;
     }
+
+    public Optional<Mother> getMotherLatestByNic(String nic) {
+        Mother mother = motherRepository.findByNic(nic);
+        List<Referral> referrals = mother.getReferrals();
+
+        for (int i = referrals.size() - 1; i >= 0; i--) {
+            if (referrals.get(i).getAntenatalOrPostnatal() == null) {
+                referrals.remove(i);
+            }else {
+                break;
+            }
+        }
+        List<Referral> newList = new ArrayList<>(List.of());
+        newList.add(referrals.get(referrals.size() -1));
+
+        mother.setReferrals(newList);
+
+        return Optional.of(mother);
+
+    }
+
+
 }

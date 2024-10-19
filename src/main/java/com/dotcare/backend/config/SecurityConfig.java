@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/authenticate", "/auth/**", "/health", "/login").permitAll()
                         .requestMatchers("/reset-password/**").permitAll()
                         .anyRequest().authenticated()
+//                        .anyRequest().hasAnyRole("MOH", "ADMIN", "DOCTOR")
                 )
                 .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
