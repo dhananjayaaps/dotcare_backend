@@ -145,9 +145,11 @@ public class MotherService {
         // Get the latest referral (the most recent one)
         Referral latestReferral = referrals.get(referrals.size() - 1);
 
+        List<Referral> referrals2 = referralRepository.findAllByMother(mother);
+
         // Prepare the list of risk factors with their dates
         List<RiskFactorDetail> riskFactorDetails = new ArrayList<>();
-        for (Referral ref : referrals) {
+        for (Referral ref : referrals2) {
             Optional<User> doctor = userRepository.findByUsername(ref.getRefferedBy());
             String doctorName = doctor.map(User::getFirst_name).orElse("Unknown");
             for (String riskFactor : ref.getRiskFactors()) {
@@ -181,63 +183,66 @@ public class MotherService {
 
         // Build the query to send to the AI model
         StringBuilder data = new StringBuilder();
-        data.append("Dataset:");
+        data.append("Dataset: ");
 
-        data.append("Name: ").append(mother.getName()).append("");
-        data.append("This is a Mother of: ").append(latestReferral.getAntenatalOrPostnatal()).append("");
+        data.append("Name: ").append(mother.getName()).append(" ");
+        data.append("This is a Mother of: ").append(latestReferral.getAntenatalOrPostnatal()).append(" ");
+
+        data.append("This is the final diagnosis of the mother: ");
 
         if (Objects.equals(latestReferral.getAntenatalOrPostnatal(), "Antenatal")) {
             if (latestReferral.getExpectedDateOfDelivery() != null) {
-                data.append("ExpectedDateOfDelivery: ").append(latestReferral.getExpectedDateOfDelivery().toString()).append("");
+                data.append(" ExpectedDateOfDelivery: ").append(latestReferral.getExpectedDateOfDelivery().toString()).append("");
             }
             if (latestReferral.getPog() != null) {
-                data.append("Pog: ").append(latestReferral.getPog()).append("");
+                data.append(" Pog: ").append(latestReferral.getPog()).append("");
             }
 
         } else {
             if (latestReferral.getModesOfDelivery() != null) {
-                data.append("ModesOfDelivery: ").append(latestReferral.getModesOfDelivery()).append("");
+                data.append(" ModesOfDelivery: ").append(latestReferral.getModesOfDelivery()).append("");
             }
             if (latestReferral.getBirthWeight() != null) {
-                data.append("BirthWeight: ").append(latestReferral.getBirthWeight()).append("");
+                data.append(" BirthWeight: ").append(latestReferral.getBirthWeight()).append("");
             }
             if (latestReferral.getPostnatalDay() != null) {
-                data.append("PostnatalDay: ").append(latestReferral.getPostnatalDay()).append("");
+                data.append(" PostnatalDay: ").append(latestReferral.getPostnatalDay()).append("");
             }
         }
 
         if (latestReferral.getParityGravidity() != null) {
-            data.append("ParityGravidity: ").append(latestReferral.getParityGravidity()).append("");
+            data.append(" ParityGravidity: ").append(latestReferral.getParityGravidity()).append("");
         }
         if (latestReferral.getParityParity() != null) {
-            data.append("ParityParity: ").append(latestReferral.getParityParity()).append("");
+            data.append(" ParityParity: ").append(latestReferral.getParityParity()).append("");
         }
         if (latestReferral.getParityChildren() != null) {
-            data.append("ParityChildren: ").append(latestReferral.getParityChildren()).append("");
+            data.append(" ParityChildren: ").append(latestReferral.getParityChildren()).append("");
         }
         if (latestReferral.getRiskFactors() != null && !latestReferral.getRiskFactors().isEmpty()) {
-            data.append("RiskFactors: ").append(String.join(", ", latestReferral.getRiskFactors())).append("");
+            data.append(" RiskFactors: ").append(String.join(", ", latestReferral.getRiskFactors())).append("");
         }
         if (latestReferral.getReasonForRequest() != null) {
-            data.append("ReasonForRequest: ").append(latestReferral.getReasonForRequest()).append("");
+            data.append(" Final Reason For Request: ").append(latestReferral.getReasonForRequest()).append("");
         }
 
-        data.append("ChannelDate: ").append(latestReferral.getChannelDate()).append("");
+        data.append(" ChannelDate: ").append(latestReferral.getChannelDate()).append("");
 
         // Append all old risk factors with their dates and doctor names
         for (RiskFactorDetail riskFactorDetail : riskFactorDetails) {
-            data.append("RiskFactor: ").append(riskFactorDetail.getRiskFactor())
-                    .append(", Date: ").append(riskFactorDetail.getChannelDate())
-                    .append(", Doctor: ").append(riskFactorDetail.getDoctorName()).append("");
+            System.out.println(" RiskFactor: " + riskFactorDetail.getRiskFactor() + " , Date: " + riskFactorDetail.getChannelDate() + " , Doctor: " + riskFactorDetail.getDoctorName() + " ");
+            data.append(" RiskFactor: ").append(riskFactorDetail.getRiskFactor())
+                    .append(" , Date: ").append(riskFactorDetail.getChannelDate())
+                    .append(" , Doctor: ").append(riskFactorDetail.getDoctorName()).append(" ");
         }
 
         // Add the user's question to the query
-        String query = data.toString() + "" + "My question is: " + question + ". This question is ask by the doctor and make a answer for he with related answer format.";
+        String query = data.toString() + "" + " My question is: " + question + ".  This question is ask by the doctor and make a answer for him. If the question is not related about the mother say " + "I am sorry, I can't answer this question. Only make healthcare related answers." + " ";
 
         // Send the query to the AI model and get the answer
         BotQuestonDTO response = new BotQuestonDTO();
         response.setAnswer(callFlaskApi(query));
-        System.out.println("Response from AI model: " + response.getAnswer());
+        System.out.println(" Response from AI model: " + response.getAnswer());
 //        get the answer and josnify it
         return response;
     }

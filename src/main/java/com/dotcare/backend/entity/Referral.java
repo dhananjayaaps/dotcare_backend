@@ -31,6 +31,8 @@ public class Referral {
     private Boolean parityChildren;
 
     @ElementCollection
+    @CollectionTable(name = "referral_risk_factors", joinColumns = @JoinColumn(name = "referral_id"))
+    @Column(name = "risk_factors", columnDefinition = "TEXT")
     private List<String> riskFactors;
 
     private String reasonForRequest;
