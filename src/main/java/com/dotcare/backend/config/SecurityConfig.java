@@ -45,6 +45,7 @@ public class SecurityConfig {
                         .requestMatchers("/authenticate", "/auth/**", "/health", "/login").permitAll()
                         .requestMatchers("/reset-password/**").permitAll()
 //                        .anyRequest().authenticated()
+                        .requestMatchers("/clinics/listMoh").hasAnyRole("DOCTOR")
                         .requestMatchers("/clinics/**").hasAnyRole("ADMIN")
                         .requestMatchers("/roles/byrole").hasAnyRole("ADMIN", "MOH", "DOCTOR")
                         .requestMatchers("/doctordates/").hasRole("ADMIN")

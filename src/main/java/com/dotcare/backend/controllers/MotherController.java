@@ -1,5 +1,6 @@
 package com.dotcare.backend.controllers;
 
+import com.dotcare.backend.dto.BotQuestonDTO;
 import com.dotcare.backend.dto.GetRefferelWithRF;
 import com.dotcare.backend.dto.ViewMotherDTO;
 import com.dotcare.backend.entity.Clinic;
@@ -97,6 +98,11 @@ public class MotherController {
     @GetMapping("/getRFandMomById")
     public GetRefferelWithRF getRiskFactorsandMotherById(@RequestParam String id) {
         return motherService.getRiskFactorsMotherById(id);
+    }
+
+    @PostMapping("/aiMotherDetails")
+    public ResponseEntity<BotQuestonDTO> AskFromAI(@RequestBody BotQuestonDTO question) {
+        return ResponseEntity.ok(motherService.getRiskFactorsMotherByIdAI(question.getNic(), question.getQuestion()));
     }
 
 }
